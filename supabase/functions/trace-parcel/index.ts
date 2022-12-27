@@ -180,7 +180,8 @@ const helper_object: helper = {
   2: { function: fanCourier, api: { uri: () => `https://www.selfawb.ro/awb_tracking_integrat.php`, payload: (tracking_id) => `username=${Deno.env.get("FAN_USERNAME")}&user_pass=${Deno.env.get("FAN_PASSWORD")}&client_id=${Deno.env.get("FAN_CLIENTID")}&AWB=${tracking_id}&display_mode=6`, headers: { 'Content-type': 'application/x-www-form-urlencoded' } } },
   3: { function: urgentcargus, api: { uri: (tracking_id) => `https://urgentcargus.azure-api.net/api/NoAuth/GetAwbTrace?barCode=${tracking_id}`, headers: { "Ocp-Apim-Subscription-Key": Deno.env.get("CARGUS_APIKEY") } } },
   4: { function: sameday, api: { uri: (tracking_id) => `https://api.sameday.ro/api/public/awb/${tracking_id}/awb-history?_locale=ro`, } },
-  5: { function: gls, api: { uri: (tracking_id) => `https://gls-group.com/app/service/open/rest/RO/ro/rstt001?match=${tracking_id}&type=&caller=witt002&millis=${new Date()}`, headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56" } } }
+  5: { function: gls, api: { uri: (tracking_id) => `https://gls-group.com/app/service/open/rest/RO/ro/rstt001?match=${tracking_id}&type=&caller=witt002&millis=${new Date()}`, headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56" } } },
+  6: { function: test, api: { uri: (tracking_id) => ""}}
 }
 
 async function dpd(tracking_id: string) {
@@ -250,6 +251,7 @@ async function urgentcargus(tracking_id: string) {
     249: IN_WAREHOUSE,
     10: IN_WAREHOUSE,
     11: IN_TRANSIT,
+    74: IN_WAREHOUSE,
     255: IN_WAREHOUSE,
     5: ON_DELIVERY,
     21: DELIVERED
@@ -327,6 +329,14 @@ async function gls(tracking_id: string) {
     })
   }
   return refactored_obj;
+}
+
+async function test(tracking_id: string) {
+  let events_obj: IRes = {
+    awbNumber: tracking_id, status: "Comanda expediata", statusId: 1, eventsHistory: [1,2,3,4,5,99].map(a => {return {county: "Here", status: "comanda expediata", statusDate: new Date(), statusId: a, country: "This"}})
+  }
+
+  return events_obj
 }
 
 serve(async (req) => {
