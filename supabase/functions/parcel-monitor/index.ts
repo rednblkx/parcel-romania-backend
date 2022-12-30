@@ -34,7 +34,7 @@ serve(async (req) => {
     const thirtyMinutesBefore = new Date();
     thirtyMinutesBefore.setMinutes(thirtyMinutesBefore.getMinutes() - 30);
     
-    const {data, error} = await supabase.from("parcels_monitoring").select("tracking_id, carrier_id(id, name), user_id").lte( "last_updated", thirtyMinutesBefore.toISOString()) as PostgrestResponse<{tracking_id: string, carrier_id: {id: string, name: string}, user_id: string}>
+    const {data, error} = await supabase.from("parcels_monitoring").select("tracking_id, carrier_id(id, name), user_id, count_events").lte( "last_updated", thirtyMinutesBefore.toISOString()) as PostgrestResponse<{tracking_id: string, carrier_id: {id: string, name: string}, user_id: string, count_events: number}>
     
     if (error) {
       throw error
@@ -42,14 +42,27 @@ serve(async (req) => {
     
     if (data && data.length > 0) {
       for await (const el of data) {
-        console.log(el);
+        // console.log(el);
         const { data: dataF, error } = await supabase.functions.invoke<IRes>("trace-parcel", { body: { tracking_id: el.tracking_id, carrier_id: el.carrier_id.id } })
         error && console.log(error);
         const { error: errorI } = await supabase.from("parcels_monitoring").update({ statusId: dataF?.statusId, last_updated: new Date() }).eq("tracking_id", el.tracking_id)
         if (errorI) {
           console.log(errorI);
         }
-        await axiod.post(`https://ntfy.kodeeater.xyz/parcel-romania-${el.user_id.slice(0, 8)}`, `${el.carrier_id.name} \n ${el.tracking_id} - ${dataF?.status}, ${dataF?.eventsHistory[0].county}`)
+        if (dataF && el.count_events < dataF?.eventsHistory.length) {
+          await axiod.post(`https://ntfy.kodeeater.xyz/parcel-romania-${el.user_id.slice(0, 8)}`, `${el.carrier_id.name} \n ${el.tracking_id} - ${dataF?.status}, ${dataF?.eventsHistory[0].county}`)
+          if (dataF.statusId == 99 || dataF.statusId == 255) {
+            const { error: errorL } = await supabase.from("parcels_monitoring").delete().eq("tracking_id", el.tracking_id)
+            if (errorL) {
+              console.log(errorL);
+            }
+          } else {
+            const { error: errorL } = await supabase.from("parcels_monitoring").update({ count_events: dataF?.eventsHistory.length }).eq("tracking_id", el.tracking_id)
+            if (errorL) {
+              console.log(errorL);
+            }
+          }
+        }
         // console.log(res.data);
         await sleep.sleepRandomAmountOfSeconds(1, 4);
       }
