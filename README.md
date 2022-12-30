@@ -9,8 +9,13 @@ This repository contains the serverless functions and database setup for the Par
   - `trace-parcel`: Called from the frontend to get the data of the parcel from the carrier
   - `parcel-monitor`: Called from the pg_cron extension using a service role API key to bypass the row level security policies
 - Setup for a supabase PostgreSQL database with tables and row level security policies
-- Cron job that runs `parcel-monitor` every 31 minutes to check for updates on the parcels
+- Cron job that runs `parcel-monitor` every 31 minutes to check for updates on the parcels and sending notifications via ntfy.sh
 - OAuth authentication with Google
+
+## Prerequisites
+
+- Node.js and npm or yarn installed
+- The Supabase CLI and docker set up: [supabase.com/docs/getting-started/install](https://supabase.com/docs/getting-started/install)
 
 ## Installation
 
@@ -22,7 +27,7 @@ To set up the backend for the app, follow these steps:
 4. Set up the supabase project:
    - Create a new supabase project and database at [supabase.com](https://supabase.com)
    - Have a look [here](https://supabase.com/docs/guides/resources/supabase-cli/local-development) for the requirements reagrding local development with supabase
-   - Run the query inside cronjob.sql in order to setup the cron job
+   - Push the migrations of the database: `supabase db push`
    - Enable Google as Auth Provider: have a look [here](https://supabase.com/docs/learn/auth-deep-dive/auth-google-oauth) or [here](https://supabase.com/docs/guides/auth/social-login/auth-google)
    - Start the supabase docker containers: `supabase start`
    - Set the environment variables as below
@@ -40,11 +45,14 @@ Note that `SUPABASE_KEY` and `SUPABASE_URL` are being provided automatically ins
 
 These environment variables are stored in a .env file in the root of the project. Make sure to set these variables before running the database setup script or deploying the functions.
 
+## Setting up the cron job
+
+To set up the cron job for the `parcel-monitor` function, run the query from the [`cronjob.sql`](cronjob.sql) file.
+
 ## Deployment
 
 To deploy the serverless functions to supabase, run the following commands:
 
-- Push the migrations of the database: `supabase db push`
 - Deploy the `trace-parcel` function: `supabase functions deploy --no-verify-jwt trace-parcel`
 - Deploy the `parcel-monitor` function: `supabase functions deploy --no-verify-jwt parcel-monitor`
 
