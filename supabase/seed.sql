@@ -4,4 +4,5 @@ values
   (2, 'FAN Courier', true),
   (3, 'Urgent Cargus', true),
   (4, 'Sameday', true),
-  (5, 'GLS', true);
+  (5, 'GLS', true),
+  (6, 'Test', true);

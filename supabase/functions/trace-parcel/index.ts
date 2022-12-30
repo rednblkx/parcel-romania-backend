@@ -8,7 +8,7 @@ import axiod from "https://deno.land/x/axiod/mod.ts";
 import * as cheerio from "https://esm.sh/cheerio"
 import { IAxiodResponse } from "https://deno.land/x/axiod/interfaces.ts";
 import moment from "https://deno.land/x/momentjs@2.29.1-deno/mod.ts";
-import { corsHeaders } from './cors.ts'
+import { corsHeaders } from '../helpers/cors.ts'
 
 const DELIVERED = 99;
 const SAMEDAY_LOADED_LOCKER = 78;
@@ -197,7 +197,7 @@ async function dpd(tracking_id: string) {
 
   $(".aSignature").remove()
 
-  const original_events = [...$("table > tbody > tr:not(:first-child)").toArray().map(el => [...$("td", el).toArray()].map((a, i) => [header[i], $(a).text()])).map<IDPD>(a => Object.fromEntries(a))];
+  const original_events = [...$("table > tbody > tr:not(:first-child)").toArray().map((el: any) => [...$("td", el).toArray()].map((a: any, i: number) => [header[i], $(a).text()])).map<IDPD>((a: any) => Object.fromEntries(a))];
 
   const refactored_obj: IRes = {
     awbNumber: tracking_id, status: original_events[original_events.length - 1]["Status colet"], statusId: 255, eventsHistory: original_events.map(obj => {
