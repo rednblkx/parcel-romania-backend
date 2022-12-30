@@ -9,6 +9,8 @@ This repository contains the serverless functions and database setup for the Par
   - `trace-parcel`: Called from the frontend to get the data of the parcel from the carrier
   - `parcel-monitor`: Called from the pg_cron extension using a service role API key to bypass the row level security policies
 - Setup for a supabase PostgreSQL database with tables and row level security policies
+- Cron job that runs `parcel-monitor` every 31 minutes to check for updates on the parcels
+- OAuth authentication with Google
 
 ## Installation
 
@@ -21,6 +23,7 @@ To set up the backend for the app, follow these steps:
    - Create a new supabase project and database at [supabase.com](https://supabase.com)
    - Have a look [here](https://supabase.com/docs/guides/resources/supabase-cli/local-development) for the requirements reagrding local development with supabase
    - Run the query inside cronjob.sql in order to setup the cron job
+   - Enable Google as Auth Provider: have a look [here](https://supabase.com/docs/learn/auth-deep-dive/auth-google-oauth) or [here](https://supabase.com/docs/guides/auth/social-login/auth-google)
    - Start the supabase docker containers: `supabase start`
    - Set the environment variables as below
    - Run the `trace-parcel` function: `supabase functions serve --no-verify-jwt --env-file .env trace-parcel`
