@@ -5,8 +5,8 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts"
 // import { createClient, PostgrestResponse } from 'https://esm.sh/@supabase/supabase-js@2'
 import axiod from "https://deno.land/x/axiod/mod.ts";
-import * as cheerio from "https://esm.sh/cheerio"
-import { IAxiodResponse } from "https://deno.land/x/axiod/interfaces.ts";
+// import cheerio from "https://esm.sh/cheerio"
+import { cheerio } from "https://deno.land/x/denocheerio/mod.ts";
 import moment from "https://deno.land/x/momentjs@2.29.1-deno/mod.ts";
 import { corsHeaders } from '../helpers/cors.ts'
 
@@ -197,10 +197,10 @@ async function dpd(tracking_id: string) {
 
   $(".aSignature").remove()
 
-  const original_events = [...$("table > tbody > tr:not(:first-child)").toArray().map((el: any) => [...$("td", el).toArray()].map((a: any, i: number) => [header[i], $(a).text()])).map<IDPD>((a: any) => Object.fromEntries(a))];
-
+  const original_events = [...$("table > tbody > tr:not(:first-child)").toArray().map((el: any) => [...$("td", el).toArray()].map((a: any, i: number) => [header[i], $(a).text()])).map<IDPD>((a) => Object.fromEntries(a))].reverse();
+  
   const refactored_obj: IRes = {
-    awbNumber: tracking_id, status: original_events[original_events.length - 1]["Status colet"], statusId: 255, eventsHistory: original_events.map(obj => {
+    awbNumber: tracking_id, status: original_events[0]["Status colet"], statusId: 255, eventsHistory: original_events.map(obj => {
       const events_obj: IEventsHistory = { country: null, county: obj["Oras/localitate"], statusDate: new Date(moment(`${obj.Data} ${obj.Ora}`, "DD.MM.YYYY h:mm:ss").format()), status: obj["Status colet"], statusId: 255 };
       return events_obj;
     })
@@ -228,7 +228,7 @@ async function fanCourier(tracking_id: string) {
   }
 
   const refactored_obj: IRes = {
-    awbNumber: tracking_id, status: data[data.length - 1].EventName, statusId: status_id[data[data.length - 1].EventId], eventsHistory: data.map(obj => {
+    awbNumber: tracking_id, status: data[data.length - 1].EventName, statusId: status_id[data[data.length - 1].EventId], eventsHistory: data.reverse().map(obj => {
       const events_obj: IEventsHistory = { country: null, county: obj.Location, statusDate: new Date(moment(obj.Date, "DD.MM.YYYY h:mm").format()), status: obj.EventName, statusId: status_id[obj.EventId] }
       return events_obj
     })
@@ -258,7 +258,7 @@ async function urgentcargus(tracking_id: string) {
   }
 
   const refactored_obj: IRes = {
-    awbNumber: data[0].Code, status: data[0].Event[data[0].Event.length - 1].Description, statusId: status_id[data[0].Event[data[0].Event.length - 1].EventId], eventsHistory: data[0].Event.map(obj => {
+    awbNumber: data[0].Code, status: data[0].Event[data[0].Event.length - 1].Description, statusId: status_id[data[0].Event[data[0].Event.length - 1].EventId], eventsHistory: data[0].Event.reverse().map(obj => {
       const events_obj: IEventsHistory = { country: null, county: obj.LocalityName, statusDate: new Date(obj.Date), status: obj.Description, statusId: status_id[obj.EventId] }
       return events_obj
     })
