@@ -30,6 +30,7 @@ interface IEventsHistory {
   statusId: number,
   county: string,
   country?: string | null,
+  transitLocation?: string | null,
   statusDate: Date
 }
 
@@ -290,7 +291,7 @@ async function sameday(tracking_id: string) {
 
   const refactored_obj: IRes = {
     awbNumber: data.awbNumber, status: data.awbHistory[0].status, statusId: status_id[data.awbHistory[0].statusId], eventsHistory: data.awbHistory.map(obj => {
-      const events_obj: IEventsHistory = { country: obj.country, county: obj.county, statusDate: new Date(obj.statusDate), status: obj.status, statusId: status_id[obj.statusId] }
+      const events_obj: IEventsHistory = { country: obj.country, county: obj.county, statusDate: new Date(obj.statusDate), status: obj.status, statusId: status_id[obj.statusId], transitLocation: obj.transitLocation }
       return events_obj
     })
   }
