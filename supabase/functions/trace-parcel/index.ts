@@ -321,6 +321,7 @@ async function sameday(tracking_id: string) {
       7: IN_TRANSIT,
       99: SAMEDAY_BUSY_LOCKER,
       34: PICKED_UP,
+      23: ORDER_CREATED,
       4: PICKED_UP,
       1: ORDER_CREATED
     }
