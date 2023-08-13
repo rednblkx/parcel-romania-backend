@@ -36,6 +36,7 @@ interface IEventsHistory {
 
 interface IRes {
   awbNumber: string,
+  error?: string,
   status: string,
   statusId: number,
   eventsHistory: IEventsHistory[]
@@ -171,7 +172,7 @@ interface IGLS {
 
 interface helper {
   [id: number]: {
-    function: (tracking_id: string) => Promise<IRes | { error: string; }>,
+    function: (tracking_id: string) => Promise<IRes>,
     api: { uri: (tracking_id?: string) => string, headers?: { [key: string]: string | undefined }, payload?: (tracking_id: string) => string }
   }
 }
@@ -221,7 +222,7 @@ async function dpd(tracking_id: string) {
   } catch (error) {
     return Promise.reject({
       error: error?.message || error,
-      tracking_id,
+      awbNumber: tracking_id,
       carrier_id: 1
     })
   }
@@ -257,7 +258,7 @@ async function fanCourier(tracking_id: string) {
   } catch (error) {
     return Promise.reject({
       error: error?.message || error,
-      tracking_id,
+      awbNumber: tracking_id,
       carrier_id: 2
     })
   }
@@ -296,7 +297,7 @@ async function urgentcargus(tracking_id: string) {
   } catch (error) {
     return Promise.reject({
       error: error?.message || error,
-      tracking_id,
+      awbNumber: tracking_id,
       carrier_id: 3
     })
   }
@@ -336,7 +337,7 @@ async function sameday(tracking_id: string) {
   } catch (error) {
     return Promise.reject({
       error: error?.message || error,
-      tracking_id,
+      awbNumber: tracking_id,
       carrier_id: 4
     })
   }
@@ -378,7 +379,7 @@ async function gls(tracking_id: string) {
   } catch (error) {
     return Promise.reject({
       error: error?.message || error,
-      tracking_id,
+      awbNumber: tracking_id,
       carrier_id: 5
     })
   }
@@ -392,7 +393,7 @@ async function test(tracking_id: string) {
 }
 
 async function throttle(arr: { carrier_id: number, tracking_id: string }[]) {
-  let res = [];
+  const res : IRes[] = [];
   for (let index = 0; index < arr.length; index++) {
     if (TOKENS < TOKENS_TO_CONSUME) {
       await new Promise<void>((resolve) => {
@@ -429,8 +430,6 @@ serve(async (req: Request) => {
   }
 
   catch (error) {
-    console.log(error);
-
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
